@@ -1,13 +1,13 @@
-from flask import Flask
+import flask
 import boto3
 import json
 import os
 
 # cat ~/.aws/credentials
-os.environ['AWS_ACCESS_KEY_ID'] = 'ASIA5ABAG7YKPRFGBXQE'
-os.environ['AWS_SECRET_ACCESS_KEY'] = '0RdosbV53ZAAhjazmdaIfkiQU6d31TGcXBWmtnai'
+os.environ['AWS_ACCESS_KEY_ID'] = ' ASIA4GAOEMH6RTCSLUN7'
+os.environ['AWS_SECRET_ACCESS_KEY'] = 'Rtkz4cCIUCp+H9ubINheX6ms/e2wV8ErksMFHzuQ'
 os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
-os.environ['AWS_SESSION_TOKEN'] = 'FwoGZXIvYXdzEEMaDDF/jH1A2LXuIlLJ0SLYAXnDvLsqJkcWECC/R1O++//SwPpECskS453s4c0SndrbHuu4bH/mbNRZIQMiNr9FguCDOxEqDtA3VEMJNtfUH0tr0WZpkT2Q2giPwCc4fn2rl9jqhrTHbq5zpzcG8Nre9NWRbgFG8JVrRPXItjhfjK+sgpEkfqj7gXf7OS0w5kgu8ihMyeg8Xt1hqrw+DK8ShR4x0kQaA3ky/vnc0q2aeQfZw3JM+ow8QDMuDVM5SOT+6qv7qzcoA3cL1rw/fcjC3M9fZZQgqy60kNYg+6W/t5rYMnSC/VFPECj5xIKoBjItbTIOA61V0Ic1+mJlcMj1OODiyiElb21yIdz3gd4wL8nu0ZpdjdvZpcKZD2k4'
+os.environ['AWS_SESSION_TOKEN'] = 'FwoGZXIvYXdzEEUaDLkfiW1wPZNAXd6WESLXAZb4AL9sF87W9TGDZRf8WFb42sb3c1vMl6yNa+4vFZ9uTrNJvO8vlGpoGPsLAShXn2fSIM63r3uuIpApLnGwqVDPoCn4lH6QPmfJgT26AKYP7mA9lerKuycosON5Cx14z67Hp9SfqbbTo8N2vEjui93FYNGsUM/vp/hbWljlSxLJHfG5uML9Q7kb907blfMrF/g9Yh2V/AgJn66qyVJ/iIqzMcaWjbLmJA54i1sx6Px9OiANswhEU+thL+rU2E2lqV69uLvRii53573ap4T/3H+fmwUdNalVKNDygqgGMi0f+1SXMob1qP2H9q1Lpmn46H6s8g18FkOpTuFi1TLDPjeWuogdFRmX+E8jc2I='
 
 ecs_client = boto3.client('ecs', region_name = "us-east-1")
 
