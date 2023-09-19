@@ -2,7 +2,7 @@ import boto3
 
 # fetching default vpc
 def fetch_vpc(ec2_client = None):
-    if !ec2_client:
+    if not ec2_client:
         ec2_client = boto3.client('ec2')
     
     return ec2_client.describe_vpcs()['Vpcs'][0]['VpcId']
