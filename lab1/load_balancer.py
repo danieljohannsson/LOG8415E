@@ -38,7 +38,7 @@ def create_lb_listener():
                             Protocol = 'HTTP',
                             Port = 80,
                             DefaultActions = [{'Type': 'forward', 'TargetGroupArn': tg1Arn, 'Order': 1}]
-                        )['Listeners'][0]['ListernerArn']
+                        )
     
     listenerArn = listener['Listeners'][0]['ListernerArn']
 
