@@ -24,22 +24,10 @@ def create_lb_listener():
     def create_rule(listenerArn, route, TGArn, priority):
         elb_client.create_rule( 
                             ListenerArn = listenerArn, 
-                            Actions =
-                                    [
-                                    {
-                                    'Type': 'forward',
-                                    'TargetGroupArn': TGArn
-                                    }
-                                    ], 
-                            Conditions = 
-                                        [
-                                        {
-                                        'Field':'path-pattern',
-                                        'Values':[route]
-                                        }
-                                        ],
-                Priority = priority
-        )
+                            Actions =[{'Type': 'forward', 'TargetGroupArn': TGArn}], 
+                            Conditions =[{ 'Field':'path-pattern', 'Values':[route]}],
+                            Priority = priority
+                        )
         return
     
     tg1Arn = create_tg('cluster1', vpc)
