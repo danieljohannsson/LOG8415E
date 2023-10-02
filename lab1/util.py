@@ -1,4 +1,5 @@
 import boto3
+import time
 
 # fetching default vpc
 def fetch_vpc(ec2_client = None):
@@ -8,19 +9,41 @@ def fetch_vpc(ec2_client = None):
     return ec2_client.describe_vpcs()['Vpcs'][0]['VpcId']
 
 # fetching subnet id
-def fetch_subnet(ec2_client, vpc_id):
-    response = ec2_client.describe_subnets(
-                        Filters=[{
-                            'Name': 'vpc-id',
-                            'Values': [vpc_id]
-                        }])
-    return response['Subnets'][0]['SubnetId']
+def fetch_subnet(ec2_client, avZones):
+    subnets = []
+    for zone in avZones:
+        response = ec2_client.describe_subnets(
+                            Filters=[{
+                                'Name': 'availabilityZone',
+                                'Values': [zone]
+                            }])
+        subnets.append(response['Subnets'][0]['SubnetId'])
+    return subnets
 
 # creating security group
-def create_sg(sc1_name='cluster1', sc2_name='cluster2'):
+def create_sg(sc1_name='1st-Tp-sg'):
     ec2_resource = boto3.resource('ec2')
     sg1_id = ec2_resource.create_security_group(
                         Description='1st cluster security group',
                         GroupName=sc1_name,
                         VpcId=fetch_vpc())
-    return sg1_id
+
+    return sg1_id.group_id
+
+def shut_down_instances(ec2_client, ids):
+    ec2_client.terminate_instances(
+        InstanceIds = ids
+    )
+
+    return
+
+def shut_down_load_balancer(elb_client, lbArn, tg1Arn, tg2Arn):
+    elb_client.delete_load_balancer(LoadBalancerArn=lbArn)
+    time.sleep(60)
+    elb_client.delete_target_group(TargetGroupArn=tg1Arn)
+    elb_client.delete_target_group(TargetGroupArn=tg2Arn)
+    return
+
+def shut_down_security_group(ec2_client, sgId):
+    ec2_client.delete_security_group(GroupId=sgId)
+    return
