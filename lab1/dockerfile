@@ -1,0 +1,12 @@
+FROM python:3.9
+
+
+# Install required python dependency
+RUN pip install requests==2.27.1
+
+# Copy web requests script into Docker container
+COPY web_requests.py web_requests.py
+
+
+# Run script to send requests to instances
+CMD [ "python",  "./web_requests.py" ]
