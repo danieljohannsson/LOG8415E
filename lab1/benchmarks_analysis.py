@@ -5,9 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 class BenchmarksAnalysis:
-    """ Metric generator used to retrieve CloudWatch metrics of target groups 
-    and generate plots.
-    """
 
     def __init__(self, elb_id, cluster_t2_id, cluster_m4_id, cluster_t2_instances_ids, cluster_m4_instances_ids):
         """Initiate MetricGenerator and print ELB and Cluster IDs."""
