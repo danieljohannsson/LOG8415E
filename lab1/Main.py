@@ -25,6 +25,19 @@ def main():
     
     time.sleep(120)
     web_requests.requests_main()
+    print('Requests done!')
+    
+    #Benchmarking performed
+    benchmark = BenchmarksAnalysis(
+        elb_id = elb_client.get('LoadBalancers')[0].get('LoadBalancerArn').split("/", 1)[1],
+        cluster_t2_id=elb_client.target_group_t2.get('TargetGroups')[0].get('TargetGroupArn').split(":")[-1],
+        cluster_m4_id=elb_client.target_group_m4.get('TargetGroups')[0].get('TargetGroupArn').split(":")[-1],
+        cluster_t2_instances_ids=ec2_client.cluster_t2_instances_ids,
+        cluster_m4_instances_ids=ec2_client.cluster_m4_instances_ids
+        )
+
+    #Plotting of the bechmarks    
+    benchmark.generate_plots()
 
 
     util.shut_down_instances(ec2_client, Instances_ids)
