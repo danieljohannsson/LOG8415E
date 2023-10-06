@@ -33,7 +33,7 @@ def get_request2(url1, url2):
 # Create and start threads for each URL
 def requests_main(DNS):
     threads = []
-    urls = [f'https://{DNS}/1', f'https://{DNS}/2']
+    urls = [f'http://{DNS}/1', f'http://{DNS}/2']
     thread1 = threading.Thread(target=get_request1, args=(urls[0],urls[1]))
     thread1.start()
     threads.append(thread1)

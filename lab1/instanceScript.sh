@@ -1,23 +1,25 @@
 #!/bin/bash
 
-apt update;
-apt -y install python3-pip;
+apt-get update;
+apt-get install cloud-utils;
+apt-get -y install python3-pip;
 pip3 install flask;
-INSTANCEID=$(ec2metadata -i);
-python -c "from flask import Flask
-app = Flask(__name__)
+pip3 install ec2-metadata;
+python3 -c "from flask import Flask
+from ec2_metadata import ec2_metadata
+app = Flask(_name_)
 
-@app.route("/")
+@app.route('/')
 def route_default():
-	return '"$INSTANCEID"'
+	return ec2_metadata.instance_id
 
-@app.route("/1")
+@app.route('/1')
 def route1():
-	return '"$INSTANCEID"'
+	return ec2_metadata.instance_id
 
-@app.route("/2")
+@app.route('/2')
 def route2():
-	return '"$INSTANCEID"'
+	return ec2_metadata.instance_id
 
-if __name__ == "__main__":
-	app.run()";
+if _name_ == '_main_':
+	app.run(host='0.0.0.0', port=80)";
