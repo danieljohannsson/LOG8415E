@@ -2,9 +2,9 @@ import boto3
 
 def EC2_instances(avZones, ec2_client, sgId):
     instanceIds = []
-    amiId = 'ami-053b0d53c279acc90'
+    amiId = 'ami-053b0d53c279acc90' #Os image that will be used in the vm
 
-    
+    # creates key pair and saves the secret key locally
     def create_key_pair(KPName):
         key = ec2_client.create_key_pair(KeyName=KPName)
         private_key = key['KeyMaterial']
@@ -12,7 +12,7 @@ def EC2_instances(avZones, ec2_client, sgId):
             key_file.write(private_key)
         return KPName
     
-    # open instance script
+    # open and load the instance bash script into variable script
     def launch_script():
         with open("instanceScript.sh", "r") as file:
             script = file.read()
@@ -30,19 +30,21 @@ def EC2_instances(avZones, ec2_client, sgId):
                         'AvailabilityZone': avZone,
                     },
                     SecurityGroupIds=[sgId],
-                    UserData=launch_script()
+                    UserData=launch_script()         # passing the loaded bash script to the instance
         )
         return response['Instances'][0]['InstanceId']
 
+    # launch the diffent set of instances
     def launch_cluster(type, number):
         for i in range(number):
             instanceIds.append(launch_instance(KPName, type, avZones[i]))
 
     
+    # creating key pair and lauching the instances
     KPName = create_key_pair('1st-assign-key3')
     launch_cluster('m4.large', 5)
     launch_cluster('t2.large', 4)
-    return  instanceIds
+    return  instanceIds, KPName
 
 def attach_instances(tg1, tg2, elb_client, instancesIds, port=80):
         

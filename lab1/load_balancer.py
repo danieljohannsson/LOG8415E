@@ -3,6 +3,7 @@ import util
 
 def create_lb_listener(subnets, ec2_client, elb_client, sgId=None):
 
+    # fetching vpc
     vpc = util.fetch_vpc(ec2_client)
 
     # create target group
@@ -12,7 +13,7 @@ def create_lb_listener(subnets, ec2_client, elb_client, sgId=None):
 
         return response['TargetGroups'][0]['TargetGroupArn']
 
-    # launching load balancer
+    # launches load balancer
     def launch_lb():
         load_balancer = elb_client.create_load_balancer(
                             Name = 'LoadBalancer',
@@ -23,7 +24,7 @@ def create_lb_listener(subnets, ec2_client, elb_client, sgId=None):
         return load_balancer['LoadBalancers'][0]['LoadBalancerArn'], load_balancer['LoadBalancers'][0]['DNSName']
 
 
-    # creating routing rule
+    # creates routing rule
     def create_rule(listenerArn, route, TGArn, priority):
         response = elb_client.create_rule( 
                     ListenerArn = listenerArn, 
@@ -33,11 +34,12 @@ def create_lb_listener(subnets, ec2_client, elb_client, sgId=None):
                     )
         return response['Rules'][0]['RuleArn']
     
+    # creating target groups and load balancer
     tg1Arn = create_tg('cluster1-1', vpc)
     tg2Arn = create_tg('cluster2-2', vpc)
     lbArn, lbDNS = launch_lb()
 
-    # creating load balancer listener
+    # creates load balancer listener
     listener = elb_client.create_listener(
                     LoadBalancerArn = lbArn,
                     Protocol = 'HTTP',
@@ -47,7 +49,10 @@ def create_lb_listener(subnets, ec2_client, elb_client, sgId=None):
     
     listenerArn = listener['Listeners'][0]['ListenerArn']
 
+    # creating 1st cluster routing pattern
     create_rule(listenerArn, '/1', tg1Arn, 1)
+
+    # creating 2nd cluster routing pattern
     create_rule(listenerArn, '/2', tg2Arn, 2)
 
     return  lbArn, tg1Arn, tg2Arn, lbDNS

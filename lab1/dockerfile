@@ -1,12 +1,10 @@
-FROM python:3.9
+FROM python:3.10
 
+# Copying files to the docker container
+COPY . .
 
-# Install required python dependency
-RUN pip install requests==2.27.1
+# Installing dependencies
+RUN pip install -r requirements.txt
 
-# Copy web requests script into Docker container
-COPY web_requests.py web_requests.py
-
-
-# Run script to send requests to instances
-CMD [ "python",  "./web_requests.py" ]
+# Running the Main
+CMD [ "python",  "Main.py" ]
