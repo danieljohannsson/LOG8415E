@@ -7,7 +7,7 @@ import time
 import benchmarks_analysis
 
 def main():
-    # Initializing clients
+    # Initializing clients for EC2 and ELBv2 services
     ec2_client = boto3.client('ec2', region_name = "us-east-1")
     elb_client = boto3.client('elbv2', region_name = "us-east-1")
 
@@ -44,9 +44,10 @@ def main():
 
     print('Requests done!')
     
-    # Realizing benchmark analysis
-    time.sleep(120)
-    benchmarks_analysis.main()
+    # Realizing benchmark analysis and printing it
+    time.sleep(240)
+    results = benchmarks_analysis.main()
+    pprint.pprint(results, indent=4)
 
     # terminating resources
     util.shut_down_instances(ec2_client, instancesIds)
