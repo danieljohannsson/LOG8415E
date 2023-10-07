@@ -13,7 +13,7 @@ def create_lb_listener(subnets, ec2_client, elb_client, sgId=None):
 
         return response['TargetGroups'][0]['TargetGroupArn']
 
-    # launches load balancer
+    # application type by default
     def launch_lb():
         load_balancer = elb_client.create_load_balancer(
                             Name = 'LoadBalancer',
