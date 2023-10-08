@@ -22,5 +22,6 @@ sudo docker build -t 1st-assign-img .
 
 # Running Docker passing the credential use your's credential file path
 sudo docker run -v $HOME/.aws/credentials:/root/.aws/credentials:ro 1st-assign-img
+```
 
 This builds and runs our docker image which in turn copies over the files and installs the dependencies, as well as running the python Main. Now the clusters are being setup and should be up and running in a few minutes.
