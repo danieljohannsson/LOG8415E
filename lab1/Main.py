@@ -5,6 +5,7 @@ import ec2_instances
 import web_requests
 import time
 import benchmarks_analysis
+import pprint
 
 def main():
     # Initializing clients for EC2 and ELBv2 services
@@ -47,14 +48,20 @@ def main():
     # Realizing benchmark analysis and printing it
     time.sleep(240)
     results = benchmarks_analysis.main()
+    results_instances = benchmarks_analysis.instances_metrics(instancesIds)
     pprint.pprint(results, indent=4)
+    print("---------------------------------------------------------------")
+    pprint.pprint(results_instances, indent=4)
+    
 
     # terminating resources
+    """
     util.shut_down_instances(ec2_client, instancesIds)
     util.shut_down_load_balancer(elb_client, lbArn, tg1Arn, tg2Arn)
     time.sleep(120)
     util.delete_security_group(ec2_client, sgId)
     util.delete_key_pair(ec2_client, KPName)
+    """
 
     print('All terminated')
     return

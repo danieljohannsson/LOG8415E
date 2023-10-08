@@ -80,3 +80,42 @@ def main():
 
     # returning for visualizing the query results
     return response["MetricDataResults"]
+
+
+def instances_metrics(instance_ids):
+    region_name = "us-east-1"
+    # Client for CloudWatch
+    client = boto3.client('cloudwatch', region_name=region_name)
+    namespace = 'AWS/EC2'
+
+    # Metric details
+    metric_name = 'CPUUtilization'
+    stat = 'Average'  
+    period = 10
+    time_offset = 30 * 60  # last 30 minutes in seconds
+
+    # Creating metric queries
+    metric_queries = []
+    for index, instance_id in enumerate(instance_ids):
+        metric_queries.append({
+            'Id': f"cpu_utilization_{index}",
+            'MetricStat': {
+                'Metric': {
+                    'Namespace': namespace,
+                    'MetricName': metric_name,
+                    'Dimensions': [{'Name': 'InstanceId', 'Value': instance_id}]
+                },
+                'Period': period,
+                'Stat': stat,
+                'Unit': 'Percent'
+            }
+        })
+
+    # Fetching the metrics
+    response = client.get_metric_data(
+        MetricDataQueries=metric_queries,
+        StartTime=datetime.utcnow() - timedelta(seconds=time_offset),
+        EndTime=datetime.utcnow()
+    )
+
+    return response["MetricDataResults"]
