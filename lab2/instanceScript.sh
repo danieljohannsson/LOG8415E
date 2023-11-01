@@ -36,6 +36,7 @@ services:
        - "5001:5001"
 EOL
 
+# Creating dockerfile
 cat > dockerfile <<EOL
 FROM python:3.10
 
@@ -47,12 +48,14 @@ COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 EOL
 
+# Creating requirements.txt
 cat > requirements.txt <<EOL
 Flask
 torch
 transformers[torch]
 EOL
 
+# Creating server.py
 cat > server.py <<EOL
 from flask import Flask, jsonify
 from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
@@ -89,4 +92,5 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=args.port)
 EOL 
 
+# Launching containers 
 docker-compose up --build
