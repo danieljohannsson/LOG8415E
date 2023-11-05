@@ -11,8 +11,8 @@ ip4=$(cat ip4.txt)
 cat > orchestrator.sh << EOL
 #!/bin/bash
 
-apt-get update;
-apt-get -y install python3-pip;
+sudo apt-get update;
+sudo apt-get -y install python3-pip;
 pip3 install flask;
 cat > ip.json << EOF
 {
@@ -111,4 +111,6 @@ def new_request():
 if __name__ == "__main__"
 	app.run(port=80)
 EOF
+
+python server.py
 EOL
