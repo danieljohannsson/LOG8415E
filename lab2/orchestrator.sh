@@ -1,19 +1,17 @@
 #!/bin/bash
 
-# Ler os valores do arquivo de texto
-
 ip1=$(cat ip1.txt)
 ip2=$(cat ip2.txt)
 ip3=$(cat ip3.txt)
 ip4=$(cat ip4.txt)
 
-# Create orchestrator script
+
 cat > orchestrator.sh << EOL
 #!/bin/bash
 
 sudo apt-get update;
 sudo apt-get -y install python3-pip;
-pip3 install flask;
+sudo pip3 install flask;
 cat > ip.json << EOF
 {
 	"container1":{
@@ -59,7 +57,7 @@ cat > ip.json << EOF
 }
 EOF
 
-cat < server.py << EOF
+cat > server.py << EOF
 from flask import Flask, jsonify, request
 import json
 import threading
@@ -75,9 +73,8 @@ def send_request_to_container(container_id, container_info, incoming_request_dat
 	# TO-DO: Send the request
 	url = f'http://{container_info.ip}:{container_info.port}'
 	response = requests.get(url)
-    print(f"Response from {url}: {response.status_code}, {response.text}")
-	
-	print(f"Receivde response from {container_id}"
+	print(f"Response from {url}: {response.status_code}, {response.text}")
+	print(f"Receivde response from {container_id}")
 
 def update_container_status(container_id, status):
 	with lock:
@@ -106,11 +103,12 @@ def process_request(incoming_request_data):
 def new_request():
 	incoming_request_data = request.json
 	threading.Thread(target=process_request, args=(incoming_request_data,)).start()
-	return jsonify({"message": Request received and processing started."})
+	return jsonify({"message": "Request received and processing started."})
 
-if __name__ == "__main__"
+if __name__ == "__main__":
 	app.run(port=80)
 EOF
 
-python server.py
+python3 server.py
+
 EOL
