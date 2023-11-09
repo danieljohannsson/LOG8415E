@@ -22,8 +22,8 @@ def main():
     instancesIds, KPName = ec2_instances.EC2_instances(avZones, ec2_client, sgId)
     orchestratorIP = instancesIds[-1][1]
     
-    time.sleep(180)
-    # Sending post requests (5 threads)
+    time.sleep(120)
+    # Sending get requests (5 threads)
     try:
         print('requesting')
         web_requests.requests_main(orchestratorIP)
@@ -31,6 +31,7 @@ def main():
     except Exception as e:
         print(e)
     
+    time.sleep(60)
     # terminating resources
     util.shut_down_instances(ec2_client, instancesIds)
     time.sleep(120)

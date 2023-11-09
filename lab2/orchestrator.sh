@@ -67,42 +67,47 @@ app = Flask(__name__)
 lock = threading.Lock()
 request_queue = []
 
-def send_request_to_container(container_id, container_info, incoming_request_data):
-	print(f"Sending request to {container_id} with data: {incoming_request_data}")
-	# TO-DO: Send the request
-	url = f'http://{container_info.ip}:{container_info.port}/run_model'
+def send_request_to_container(container_id, container_info):
+	print(f"Sending request to {container_id}")
+	ip = container_info['ip']
+	port = container_info['port']
+	url = f'http://{ip}:{port}/run_model'
 	response = requests.post(url)
 	print(f"Response from {url}: {response.status_code}, {response.text}")
 	print(f"Receivde response from {container_id}")
+	return response.text
 
 def update_container_status(container_id, status):
 	with lock:
 		with open("ip.json", "r") as f:
 			data = json.load(f)
 		data[container_id]["status"] = status
-		with open("ip.json", "r") as f:
+		with open("ip.json", "w") as f:
 			json.dump(data, f)
-def process_request(incoming_request_data):
+
+def process_request():
 	with lock:
 		with open("ip.json", "r") as f:
 			data = json.load(f)
 	free_container = None
 	for container_id, container_info in data.items():
 		if container_info["status"] == "free":
-			free_container = containeri_id
+			free_container = container_id
 			break
 	if free_container:
 		update_container_status(free_container, "busy")
-		send_request_to_container(free_container, data[free_container], incoming_request_data)
+		response = send_request_to_container(free_container, data[free_container])
+		request_queue.append('served')
 		update_container_status(free_container, "free")
+		return response
 	else:
-		request_queue.append(incoming_request_data)
+		request_queue.append('busy')
+		return request_queue
 		
-@app.route("/new_request", methods=["POST"])
+@app.route("/new_request", methods=["GET"])
 def new_request():
-	incoming_request_data = request.json
-	threading.Thread(target=process_request, args=(incoming_request_data,)).start()
-	return jsonify({"message": "Request received and processing started."})
+	threading.Thread(target=process_request).start()
+	return jsonify({"message": str(request_queue)})
 
 @app.route("/hello", methods=["GET"])
 def hello():
@@ -110,6 +115,7 @@ def hello():
 
 if __name__ == "__main__":
 	app.run(host='0.0.0.0', port=5000)
+
 EOF
 sudo python3 server.py;
 EOL

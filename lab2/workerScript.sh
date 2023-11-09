@@ -78,6 +78,18 @@ def run_model():
 def hello():
     return "Hello World"
 
+@app.route('/run_model_get', methods=['GET'])
+def run_model_get():
+    input_text =  generate_random_text()
+    
+    inputs = tokenizer(input_text, return_tensors='pt', padding=True, truncation=True)
+    outputs = model(**inputs)
+
+    probabilities = torch.softmax(outputs.logits, dim=-1)
+    probabilities_list = probabilities.tolist()[0]
+
+    return jsonify({"input_text": input_text, "probabilities": probabilities_list})
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('port', type=int, help='server port')
