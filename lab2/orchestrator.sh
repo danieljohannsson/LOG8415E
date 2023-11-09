@@ -6,7 +6,7 @@ ip3=$(cat ip3.txt)
 ip4=$(cat ip4.txt)
 
 
-cat > orchestrator.sh << EOL
+cat > orchestratorScript.sh << EOL
 #!/bin/bash
 
 sudo apt-get update;
@@ -18,37 +18,37 @@ cat > ip.json << EOF
 		"ip": "${ip1}",
 		"port": "5000",
 		"status": "free"
-	}
+	},
 	"container2":{
 		"ip": "${ip1}",
 		"port": "5001",
 		"status": "free"
-	}
+	},
 	"container3":{
 		"ip": "${ip2}",
 		"port": "5000",
 		"status": "free"
-	}
+	},
 	"container4":{
 		"ip": "${ip2}",
 		"port": "5001",
 		"status": "free"
-	}
+	},
 	"container5":{
 		"ip": "${ip3}",
 		"port": "5000",
 		"status": "free"
-	}
+	},
 	"container6":{
 		"ip": "${ip3}",
 		"port": "5001",
 		"status": "free"
-	}
+	},
 	"container7":{
 		"ip": "${ip4}",
 		"port": "5000",
 		"status": "free"
-	}
+	},
 	"container8":{
 		"ip": "${ip4}",
 		"port": "5001",
@@ -56,7 +56,6 @@ cat > ip.json << EOF
 	}
 }
 EOF
-
 cat > server.py << EOF
 from flask import Flask, jsonify, request
 import json
@@ -71,8 +70,8 @@ request_queue = []
 def send_request_to_container(container_id, container_info, incoming_request_data):
 	print(f"Sending request to {container_id} with data: {incoming_request_data}")
 	# TO-DO: Send the request
-	url = f'http://{container_info.ip}:{container_info.port}'
-	response = requests.get(url)
+	url = f'http://{container_info.ip}:{container_info.port}/run_model'
+	response = requests.post(url)
 	print(f"Response from {url}: {response.status_code}, {response.text}")
 	print(f"Receivde response from {container_id}")
 
@@ -105,10 +104,12 @@ def new_request():
 	threading.Thread(target=process_request, args=(incoming_request_data,)).start()
 	return jsonify({"message": "Request received and processing started."})
 
+@app.route("/hello", methods=["GET"])
+def hello():
+	return jsonify({"message": "Hello World"})
+
 if __name__ == "__main__":
-	app.run(port=80)
+	app.run(host='0.0.0.0', port=5000)
 EOF
-
-python3 server.py
-
+sudo python3 server.py;
 EOL

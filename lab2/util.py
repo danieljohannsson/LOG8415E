@@ -21,7 +21,7 @@ def fetch_subnet(ec2_client, avZones):
     return subnets
 
 # creating security group
-def create_sg(ec2_client, sc1_name='1st-Tp-sg3'):
+def create_sg(ec2_client, sc1_name='2nd-Tp-sg'):
     ec2_resource = boto3.resource('ec2', region_name = "us-east-1")
     sg1_id = ec2_resource.create_security_group(
                         Description='1st cluster security group1',
@@ -42,7 +42,8 @@ def create_sg(ec2_client, sc1_name='1st-Tp-sg3'):
 
 
 # terminating instance
-def shut_down_instances(ec2_client, ids):
+def shut_down_instances(ec2_client, instances):
+    ids = [i[0] for i in instances]
     ec2_client.terminate_instances(
         InstanceIds = ids
     )

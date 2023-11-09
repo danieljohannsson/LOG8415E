@@ -1,24 +1,20 @@
 #!/bin/bash
 
 # Add Docker's official GPG key:
-sudo apt-get update
-sudo apt-get install ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg |sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
+sudo apt-get -y update;
+sudo apt-get -y install ca-certificates curl gnupg;
+sudo install -m 0755 -d /etc/apt/keyrings;
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg |sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/docker.gpg;
+sudo chmod a+r /etc/apt/keyrings/docker.gpg;
 # Add the repository to Apt sources:
 echo \
   "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
   "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null;
+sudo apt-get -y update;
 # Installing Docker and Docker compose plugin
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
+sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin;
 # creating docker compose
-
 cat > docker-compose.yml << EOL
 services:
   1st_pythonapp:
@@ -36,7 +32,6 @@ services:
        - "5001:5001"
 
 EOL
-
 # Creating dockerfile
 cat > dockerfile << EOL
 FROM python:3.10
@@ -48,10 +43,7 @@ COPY ./server.py .
 RUN pip install Flask
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install transformers[torch]
-
 EOL
-
-
 # Creating server.py
 cat > server.py << EOL
 from flask import Flask, jsonify
@@ -82,13 +74,15 @@ def run_model():
 
     return jsonify({"input_text": input_text, "probabilities": probabilities_list})
 
+@app.route('/hello', methods=['GET'])
+def hello():
+    return "Hello World"
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('port', type=int, help='server port')
     args = parser.parse_args()
     app.run(host='0.0.0.0', port=args.port)
-
 EOL
-
 # Launching containers 
-sudo docker compose up --build
+sudo docker compose -p workers up --build;

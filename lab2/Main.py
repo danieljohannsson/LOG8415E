@@ -3,7 +3,7 @@ import time
 import util
 import subprocess
 import web_requests
-from lab2.ec2_instances import EC2_instances
+import ec2_instances 
 
 
 def main():
@@ -19,24 +19,23 @@ def main():
     print("client connected")
 
     # Launch 4 workers and 1 orchestrator of type m4 large
-    instancesIds, KPName = EC2_instances.EC2_instances(avZones, ec2_client, sgId)
+    instancesIds, KPName = ec2_instances.EC2_instances(avZones, ec2_client, sgId)
     orchestratorIP = instancesIds[-1][1]
-
-    # run the orchestrator script 
-    result = subprocess.run(['sh', './orchestrator.sh'])
-
+    
+    time.sleep(180)
     # Sending post requests (5 threads)
-    print('requesting')
-    web_requests.requests_main(orchestratorIP)
-    print('Requests done!')
+    try:
+        print('requesting')
+        web_requests.requests_main(orchestratorIP)
+        print('Requests done!')
+    except Exception as e:
+        print(e)
     
     # terminating resources
-    """
     util.shut_down_instances(ec2_client, instancesIds)
     time.sleep(120)
-    util.delete_security_group(ec2_client, sgId)
     util.delete_key_pair(ec2_client, KPName)
-    """
+    util.delete_security_group(ec2_client, sgId)
 
     print('All terminated')
     return

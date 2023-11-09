@@ -2,18 +2,23 @@ import requests
 import threading, time
 
 def post_requsts(url):
+    headers={
+        'Content-type':'application/json', 
+        'Accept':'application/json'
+    }
 
     print("Thread: began")
 
-    for i in range(3):    
-        response = requests.post(url, data={'key': 'value'})
+    for i in range(3):
+        myobj = {'key': 'value'}
+        response = requests.post(url, json=myobj, headers=headers)
         print(f"Response from {url}: {response.status_code}, {response.text}")
     return
 
 # Create and start threads for each URL
 def requests_main(DNS):
     threads = []
-    url = [f'http://{DNS}/new_request']
+    url = [f'http://{DNS}:5000/new_request']
     thread1 = threading.Thread(target=post_requsts, args=(url))
     thread1.start()
     threads.append(thread1)

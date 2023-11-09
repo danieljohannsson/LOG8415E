@@ -1,5 +1,5 @@
 import boto3
-import subprocess
+import subprocess, pprint
 
 def EC2_instances(avZones, ec2_client, sgId):
     instanceIds = []
@@ -20,7 +20,7 @@ def EC2_instances(avZones, ec2_client, sgId):
         return script
     
     def launch_script_orchestrator():
-        with open("orchestratorSCRIPT.sh", "r") as file:
+        with open("orchestratorScript.sh", "r") as file:
             script = file.read()
         return script
     
@@ -32,13 +32,17 @@ def EC2_instances(avZones, ec2_client, sgId):
                     MaxCount=1,
                     InstanceType=Itype,
                     KeyName=KPName,
-                    Placement={
-                        'AvailabilityZone': avZone,
-                    },
                     SecurityGroupIds=[sgId],
                     UserData=launch_script_orchestrator() if role == 1 else launch_script() # passing the loaded bash script to the instance
         )
-        return response['Instances'][0]['InstanceId'], response['Instances'][0]['PublicIpAddress']
+        ec2 = boto3.resource('ec2')
+        id = response['Instances'][0]['InstanceId']
+        instance = ec2.Instance(id)
+        instance.wait_until_running()
+        instance.reload()
+        
+        pprint.pprint(instance.public_ip_address)
+        return id, instance.public_ip_address
 
     # launch the diffent set of instances
     def launch_cluster(type, number):
@@ -48,12 +52,12 @@ def EC2_instances(avZones, ec2_client, sgId):
     # store ip adress of instances in files
     def storeIpAddresses(instanceIds):
         for i in range(4):
-            with open(f"ip{i}.txt", "w") as file:
+            with open(f"ip{i+1}.txt", "w") as file:
                 file.write(instanceIds[i][1])
             
 
     # creating key pair and lauching the instances
-    KPName = create_key_pair('1st-assign-key3')
+    KPName = create_key_pair('2nd-assign-key')
     launch_cluster('m4.large', 4)
 
     # store ip adresses of workers
