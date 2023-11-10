@@ -85,24 +85,39 @@ def update_container_status(container_id, status):
 		with open("ip.json", "w") as f:
 			json.dump(data, f)
 
-def process_request():
-	with lock:
-		with open("ip.json", "r") as f:
-			data = json.load(f)
+def check_availability(data):
 	free_container = None
 	for container_id, container_info in data.items():
 		if container_info["status"] == "free":
 			free_container = container_id
 			break
+	return free_container
+
+def requesting(free_container, data):
+	update_container_status(free_container, "busy")
+	response = send_request_to_container(free_container, data)
+	update_container_status(free_container, "free")
+	return response
+
+def process_request():
+	with lock:
+		with open("ip.json", "r") as f:
+			data = json.load(f)
+	free_container = check_availability(data)
 	if free_container:
-		update_container_status(free_container, "busy")
-		response = send_request_to_container(free_container, data[free_container])
-		request_queue.append('served')
-		update_container_status(free_container, "free")
-		return response
+		return requesting(free_container, data[free_container])
 	else:
 		request_queue.append('busy')
-		return request_queue
+		response = None
+		while(response == None):
+			with lock:
+				with open("ip.json", "r") as f:
+					data = json.load(f)
+			free_container = check_availability(data)
+			if free_container:
+				request_queue.pop()
+				response = requesting(free_container, data[free_container])
+		return response
 		
 @app.route("/new_request", methods=["GET"])
 def new_request():
@@ -112,6 +127,10 @@ def new_request():
 @app.route("/hello", methods=["GET"])
 def hello():
 	return jsonify({"message": "Hello World"})
+
+@app.route("/queue", methods=['GET'])
+def queue():
+	return jsonify({"message": str(len(request_queue))})
 
 if __name__ == "__main__":
 	app.run(host='0.0.0.0', port=5000)
