@@ -30,7 +30,7 @@ def main():
         print('Requests done!')
     except Exception as e:
         print(e)
-    
+
     time.sleep(60)
     # terminating resources
     util.shut_down_instances(ec2_client, instancesIds)

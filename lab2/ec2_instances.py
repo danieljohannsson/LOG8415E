@@ -13,7 +13,7 @@ def EC2_instances(avZones, ec2_client, sgId):
             key_file.write(private_key)
         return KPName
     
-    # open and load the instance bash script into variable script
+    # open and load the instance bash script into a string variable
     def launch_script():
         with open("workerScript.sh", "r") as file:
             script = file.read()

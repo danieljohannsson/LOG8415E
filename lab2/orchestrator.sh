@@ -122,7 +122,10 @@ def process_request():
 @app.route("/new_request", methods=["GET"])
 def new_request():
 	threading.Thread(target=process_request).start()
-	return jsonify({"message": str(request_queue)})
+	if len(request_queue) == 0:
+		return jsonify({"message": "Request received and being processed"})
+	else:
+		return jsonify({"message": f"Request received and will be processed soon. {len(request_queue)} process prior to yours"})
 
 @app.route("/hello", methods=["GET"])
 def hello():
@@ -130,7 +133,7 @@ def hello():
 
 @app.route("/queue", methods=['GET'])
 def queue():
-	return jsonify({"message": str(len(request_queue))})
+	return jsonify({"Queue lenght": str(len(request_queue))})
 
 if __name__ == "__main__":
 	app.run(host='0.0.0.0', port=5000)

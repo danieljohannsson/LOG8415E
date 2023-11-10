@@ -6,7 +6,15 @@ def get_requests(url):
 
     print("Thread: began")
 
-    for i in range(10):
+    for i in range(20):
+        response = requests.get(url)
+        print(f"Response from {url}: {response.status_code}, {response.text}")
+    return
+
+# request queue status function
+def get_queue_requests(url):
+    for i in range(15):
+        time.sleep(0.25)
         response = requests.get(url)
         print(f"Response from {url}: {response.status_code}, {response.text}")
     return
@@ -38,4 +46,12 @@ def requests_main(DNS):
     for thread in threads:
         thread.join()
     
+    # request the queue status
+    time.sleep(5)
+    url = [f'http://{DNS}:5000/queue']
+    get_queue_requests(url[0])
+
+    time.sleep(15)
+    get_queue_requests(url[0])
+
     return
