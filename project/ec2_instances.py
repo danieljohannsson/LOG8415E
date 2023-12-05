@@ -15,7 +15,7 @@ def EC2_instances(avZones, ec2_client, sgId):
     
     # open and load the instance bash script into a string variable
     def launch_script():
-        with open("workerScript.sh", "r") as file:
+        with open("standaloneScript.sh", "r") as file:
             script = file.read()
         return script
     
@@ -28,9 +28,9 @@ def EC2_instances(avZones, ec2_client, sgId):
                     InstanceType=Itype,
                     KeyName=KPName,
                     SecurityGroupIds=[sgId],
-                    UserData=
+                    #UserData=
         )
-        ec2 = boto3.resource('ec2')
+        ec2 = boto3.resource('ec2', region_name = "us-east-1")
         id = response['Instances'][0]['InstanceId']
         instance = ec2.Instance(id)
         instance.wait_until_running()
@@ -45,15 +45,14 @@ def EC2_instances(avZones, ec2_client, sgId):
             instanceIds.append(launch_instance(KPName, type, avZones[i]))
 
     # store ip adress of instances in files
-    def storeIpAddresses(instanceIds):
-        for i in range(4):
-            with open(f"ip{i+1}.txt", "w") as file:
-                file.write(instanceIds[i][1])
+    def launch_standalone(type):
+        instanceIds.append(launch_instance(KPName, type, avZones[0], 1))
+        return instanceIds[-1][1]
             
 
     # creating key pair and lauching the instances
     KPName = create_key_pair('2nd-assign-key')
-    launch_cluster('m4.large', 4)
+    launch_cluster('t2.micro', 4)
 
     # store ip adresses of workers
     storeIpAddresses(instanceIds)
