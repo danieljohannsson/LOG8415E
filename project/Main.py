@@ -1,45 +1,59 @@
-import boto3
 import time
-import util
-import subprocess
-import web_requests
-import ec2_instances 
+import boto3
+import instance_builder
 
+security_group_names = ['proxy_sg', 'cluster_sg', 'standalone_sg']
+instanceIds = []
+sgIds = []
 
-def main():
-    # Initializing clients for EC2 service
-    ec2_client = boto3.client('ec2', region_name = "us-east-1")
-    print("client connected")
+# creating proxy
+def create_proxy(client):
+    print('Creating proxy...')
+    security_group_id = instance_builder.create_security_group(client, security_group_names[0], 'For proxy.')
+    proxy = instance_builder.create_instances(client,'t2.large', security_group_id, '172.31.64.4', 'proxy')
+    instanceIds.append(proxy['Instances'][0]['InstanceId'])
+    sgIds.append(security_group_id)
 
-    # Declaring Availability zones
-    avZones = ['us-east-1a', 'us-east-1b', 'us-east-1c', 'us-east-1d', 'us-east-1e']
+# creating cluster database
+def create_cluster(client):
+    print('Creating cluster...')
+    security_group_id = instance_builder.create_security_group(client, security_group_names[1], 'For SQL cluster.')
+    master = instance_builder.create_instances(client,'t2.micro', security_group_id, '172.31.64.5', 'master')
+    instanceIds.append(master['Instances'][0]['InstanceId'])
+    sgIds.append(security_group_id)
 
-    # create security zone
-    sgId = util.create_sg(ec2_client)
-    print("client connected")
+    for i in range(3):
+        ip_address = '172.31.64.' + str(6+i)
+        instance_name = 'slave_' + str(i + 1)
+        slave = instance_builder.create_instances(client,'t2.micro', security_group_id, ip_address, instance_name)
+        instanceIds.append(slave['Instances'][0]['InstanceId'])
 
-    # Launch 4 workers and 1 orchestrator of type m4 large
-    instancesIds, KPName = ec2_instances.EC2_instances(avZones, ec2_client, sgId)
-    orchestratorIP = instancesIds[-1][1]
+# creating standalone database
+def create_standalone(client):
+    print('Creating standalone database...')
+    security_group_id = instance_builder.create_security_group_standalone(client)
+    standalone_server = instance_builder.create_instances(client,'t2.micro', security_group_id, '172.31.64.9', 'standalone')
+    instanceIds.append(standalone_server['Instances'][0]['InstanceId'])
+    sgIds.append(security_group_id)
+
+#Starting standale server, cluster and proxy
+if __name__ == '__main__':
+    ec2_client = boto3.client('ec2', region_name='us-east-1')
+    waiter = ec2_client.get_waiter('instance_terminated')
+
+    create_standalone(ec2_client)
+    create_cluster(ec2_client)
+    create_proxy(ec2_client)
     
-    time.sleep(120)
-    # Sending get requests (5 threads)
-    try:
-        print('requesting')
-        web_requests.requests_main(orchestratorIP)
-        print('Requests done!')
-    except Exception as e:
-        print(e)
-
-    time.sleep(60)
-    # terminating resources
-    util.shut_down_instances(ec2_client, instancesIds)
-    time.sleep(120)
-    util.delete_key_pair(ec2_client, KPName)
-    util.delete_security_group(ec2_client, sgId)
-
+    while (input('Press enter to terminate instances...') != ''):
+        continue
+    
+    print('Terminating instances...')
+    instance_builder.shut_down_instances(ec2_client, instanceIds)
+    
+    waiter.wait(InstanceIds=instanceIds)
     print('All terminated')
-    return
-
-main()
-
+    
+    instance_builder.delete_security_group(ec2_client, sgIds)
+    print('Security groups deleted')
+    
